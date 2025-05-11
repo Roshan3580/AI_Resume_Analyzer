@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Resume Analyzer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0066ff;
+      --primary-dark: #0052cc;
+      --secondary: #14b8a6;
+      --light: #f8fafc;
+      --dark: #0f172a;
+      --gray: #64748b;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --border: #e2e8f0;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      color: var(--dark);
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+    
+    .container {
+      max-width: 1000px;
+      padding: 0 1.5rem;
+    }
+    
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+    
+    .app-title {
+      font-weight: 700;
+      font-size: 1.75rem;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .app-title i {
+      color: var(--primary);
+    }
+    
+    .app-subtitle {
+      color: var(--gray);
+      font-weight: 400;
+      font-size: 1rem;
+    }
+    
+    .card {
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      background-color: white;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    
+    .upload-card {
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .file-upload-wrapper {
+      width: 100%;
+      max-width: 500px;
+      margin: 1.5rem auto;
+      background-color: var(--light);
+      padding: 2.5rem;
+      border-radius: 12px;
+      border: 2px dashed var(--border);
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .file-upload-wrapper:hover {
+      border-color: var(--primary);
+      background-color: rgba(0, 102, 255, 0.03);
+    }
+    
+    .file-upload-wrapper.has-file {
+      background-color: rgba(0, 102, 255, 0.05);
+      border-color: var(--primary);
+    }
+    
+    .api-key-section {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .form-label {
+      font-weight: 500;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+    
+    .input-group {
+      position: relative;
+    }
+    
+    .input-group .form-control {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+    
+    .input-group .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.15);
+    }
+    
+    .input-group .btn {
+      border-radius: 0 8px 8px 0;
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-left: none;
+    }
+    
+    .form-text {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      border: none;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 102, 255, 0.1);
+      margin-top: 1.5rem;
+    }
+    
+    .btn-primary:hover, .btn-primary:focus {
+      background-color: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 102, 255, 0.2);
+    }
+    
+    .feedback-section {
+      display: none;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .section-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .section-title i {
+      color: var(--primary);
+    }
+    
+    .card-content {
+      padding: 1.5rem;
+    }
+    
+    .badge {
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    
+    .badge.bg-success {
+      background-color: var(--success) !important;
+    }
+    
+    .badge.bg-primary {
+      background-color: var(--primary) !important;
+    }
+    
+    .badge.bg-warning {
+      background-color: var(--warning) !important;
+    }
+    
+    .badge.bg-danger {
+      background-color: var(--danger) !important;
+    }
+    
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    /* Add new CSS for experience evaluation section */
+    .experience-card {
+      grid-column: span 2;
+    }
+    
+    @media (max-width: 991px) {
+      .experience-card {
+        grid-column: span 1;
+      }
+    }
+    
+    /* Improve spacing in feedback sections */
+    .feedback-content {
+      line-height: 1.6;
+    }
+    
+    .feedback-content .mb-2 {
+      margin-bottom: 0.75rem !important;
+    }
+    
+    .feedback-content .mb-3 {
+      margin-bottom: 1.25rem !important;
+    }
+    
+    .feedback-content strong {
+      color: var(--dark);
+    }
+    
+    .feedback-content .ms-3 {
+      margin-left: 1.25rem !important;
+    }
+    
+    #fileName {
+      margin-top: 1rem;
+      font-weight: 500;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    #errorMessage {
+      color: var(--danger);
+      font-weight: 500;
+      margin-top: 1rem;
+      display: none;
+      padding: 0.75rem;
+      border-radius: 8px;
+      background-color: rgba(239, 68, 68, 0.1);
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .loader {
+      width: 50px;
+      height: 50px;
+      margin: 2rem auto;
+      display: none;
+      position: relative;
+    }
+    
+    .loader:before {
+      content: '';
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 3px solid #f3f3f3;
+      border-top-color: var(--primary);
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .result-card {
+      animation: fadeIn 0.4s ease;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      border: 1px solid var(--border);
+      height: 100%;
+    }
+    
+    .result-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 102, 255, 0.3);
+    }
+    
+    ul#improvement-suggestions {
+      padding-left: 1.25rem;
+      margin-bottom: 0;
+    }
+    
+    ul#improvement-suggestions li {
+      margin-bottom: 0.75rem;
+      position: relative;
+    }
+    
+    ul#improvement-suggestions li:last-child {
+      margin-bottom: 0;
+    }
+    
+    .overall-score-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .score-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+    
+    .score-details {
+      flex: 1;
+    }
+    
+    .score-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      font-size: 1.1rem;
+    }
+    
+    .score-description {
+      color: var(--gray);
+      margin: 0;
+    }
+    
+    /* New styles for analysis categories */
+    .analysis-category {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .analysis-category:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    
+    .category-title {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .strength-item, .improvement-item {
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+    
+    .strength-item {
+      background-color: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--success);
+    }
+    
+    .improvement-item {
+      background-color: rgba(245, 158, 11, 0.1);
+      border-left: 3px solid var(--warning);
+    }
+    
+    .red-flag-item {
+      background-color: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid var(--danger);
+    }
+    
+    .item-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .item-title i.fa-check {
+      color: var(--success);
+    }
+    
+    .item-title i.fa-triangle-exclamation {
+      color: var(--warning);
+    }
+    
+    .item-title i.fa-circle-exclamation {
+      color: var(--danger);
+    }
+    
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    @media (max-width: 767.98px) {
+      .upload-card {
+        padding: 1.5rem;
+      }
+      
+      .file-upload-wrapper {
+        padding: 1.5rem 1rem;
+      }
+      
+      .btn-primary {
+        width: 100%;
+      }
+      
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .analysis-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="app-header">
+      <div>
+        <h1 class="app-title"><i class="fas fa-file-search"></i>AI Resume Analyzer</h1>
+        <p class="app-subtitle">Get professional feedback on your resume</p>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="upload-card">
+        <form id="resume-form" class="w-100">
+          <h2 class="mb-4">Upload Your Resume</h2>
+          
+          <div class="file-upload-wrapper" id="file-upload-area">
+            <input type="file" id="file-input" class="form-control" accept="application/pdf" style="display: none;">
+            <label for="file-input" class="d-block">
+              <div class="text-center">
+                <i class="fas fa-file-pdf fa-3x text-primary mb-3"></i>
+                <h5 class="mb-2">Drag & drop your resume here</h5>
+                <p class="text-muted mb-0">or click to browse files (PDF only)</p>
+              </div>
+            </label>
+            <div id="fileName" class="text-center"></div>
+          </div>
+          
+          <div class="api-key-section">
+            <label for="api-key" class="form-label">OpenAI API Key</label>
+            <div class="input-group">
+              <input type="password" class="form-control" id="api-key" placeholder="Enter your OpenAI API key">
+              <button class="btn" type="button" id="toggle-api-key">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="form-text mt-2"><i class="fas fa-shield-alt me-1"></i> Your API key is required for analysis and will not be stored.</div>
+            
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary"><i class="fas fa-bolt me-2"></i>Analyze Resume</button>
+            </div>
+            <div id="errorMessage" class="text-center mt-3"></div>
+          </div>
+        </form>
+
+        <div class="loader" id="loader"></div>
+      </div>
+    </div>
+
+    <div class="feedback-section" id="feedback-section">
+      <div class="overall-score-card card">
+        <div class="section-header">
+          <h3 class="section-title"><i class="fas fa-chart-line"></i>Analysis Results</h3>
+        </div>
+        <div class="card-content">
+          <div class="d-flex align-items-center">
+            <div id="overall-score-circle" class="score-circle">
+              -
+            </div>
+            <div class="score-details ms-3">
+              <h4 class="score-title">Overall Resume Score</h4>
+              <p class="score-description">Based on skills, experience, and format analysis</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience & Career Progression -->
+      <div class="card result-card experience-card">
+        <div class="section-header">
+          <h3 class="section-title"><i class="fas fa-briefcase"></i>Experience & Career Progression</h3>
+        </div>
+        <div class="card-content">
+          <div id="experience-evaluation" class="feedback-content">
+            <!-- Will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <!-- Skills Assessment -->
+        <div class="result-card">
+          <div class="section-header">
+            <h3 class="section-title"><i class="fas fa-tools"></i>Skills Match</h3>
+          </div>
+          <div class="card-content">
+            <div id="skills-assessment" class="feedback-content">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Education & Qualifications -->
+        <div class="result-card">
+          <div class="section-header">
+            <h3 class="section-title"><i class="fas fa-graduation-cap"></i>Education & Qualifications</h3>
+          </div>
+          <div class="card-content">
+            <div id="education-qualifications" class="feedback-content">
+              <div class="placeholder-content">
+                <p><i class="fas fa-spinner fa-spin me-2"></i> Analyzing education details...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Format & Structure -->
+      <div class="card result-card">
+        <div class="section-header">
+          <h3 class="section-title"><i class="fas fa-file-alt"></i>Format & Presentation</h3>
+        </div>
+        <div class="card-content">
+          <div id="format-structure" class="feedback-content">
+            <!-- Will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Improvement Suggestions -->
+      <div class="card result-card">
+        <div class="section-header">
+          <h3 class="section-title"><i class="fas fa-lightbulb"></i>Actionable Improvements</h3>
+        </div>
+        <div class="card-content">
+          <div id="improvement-suggestions-container" class="feedback-content">
+            <div class="analysis-grid" id="improvement-grid">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Red Flags -->
+      <div class="card result-card" id="red-flags-card">
+        <div class="section-header">
+          <h3 class="section-title"><i class="fas fa-exclamation-triangle"></i>Areas of Concern</h3>
+        </div>
+        <div class="card-content">
+          <div id="red-flags" class="feedback-content">
+            <!-- Will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
