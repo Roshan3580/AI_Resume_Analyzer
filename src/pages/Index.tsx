@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Crown, FileText, Zap, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,59 +37,6 @@ const Index = () => {
     toast.success(`Resume "${file.name}" uploaded successfully!`);
   };
 
-  const simulateAnalysis = async (): Promise<AnalysisResults> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    return {
-      overallScore: 78,
-      sections: [
-        {
-          title: 'Skills Assessment',
-          score: 82,
-          content: 'Your technical skills portfolio demonstrates strong proficiency in modern technologies. The combination of programming languages, frameworks, and tools shows well-rounded expertise. However, there are opportunities to enhance certain areas.',
-          suggestions: [
-            'Consider adding more cloud computing skills (AWS, Azure, GCP)',
-            'Include soft skills like leadership and communication',
-            'Add specific certifications or achievement metrics'
-          ]
-        },
-        {
-          title: 'Experience Evaluation',
-          score: 75,
-          content: 'Your work experience shows progressive career growth with meaningful contributions. The descriptions effectively highlight achievements over responsibilities. Some entries could benefit from more quantified results and impact statements.',
-          suggestions: [
-            'Add more quantified achievements (percentages, dollar amounts, time saved)',
-            'Use stronger action verbs to begin each bullet point',
-            'Include specific technologies used in each role'
-          ]
-        },
-        {
-          title: 'Education Qualifications',
-          score: 85,
-          content: 'Your educational background is well-presented and relevant to your career goals. The combination of formal education and continuous learning demonstrates commitment to professional development.',
-          suggestions: [
-            'Consider adding relevant coursework for each degree',
-            'Include any academic honors or distinctions',
-            'Add relevant online courses or certifications'
-          ]
-        },
-        {
-          title: 'Format & Structure',
-          score: 70,
-          content: 'The resume structure follows a logical flow and is generally well-organized. However, there are opportunities to improve readability, consistency, and visual hierarchy to make it more ATS-friendly.',
-          suggestions: [
-            'Use consistent formatting for dates and locations',
-            'Improve white space distribution for better readability',
-            'Consider using bullet points more effectively',
-            'Ensure consistent font sizes and styles throughout'
-          ]
-        }
-      ],
-      timestamp: new Date().toISOString()
-    };
-  };
-
   const handleAnalyze = async () => {
     if (!apiKey.trim()) {
       toast.error('Please enter your Groq API key first.');
@@ -106,14 +52,93 @@ const Index = () => {
     setAnalysisResults(null);
 
     try {
-      // In a real implementation, you would:
-      // 1. Extract text from PDF using a library like PDF.js
-      // 2. Send the text to your backend API
-      // 3. Backend would call Groq API for analysis
-      // For now, we'll simulate the analysis
-      
-      const results = await simulateAnalysis();
-      setAnalysisResults(results);
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('api_key', apiKey);
+
+      const response = await fetch('http://localhost:8000/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      // Map backend response to frontend format
+      const feedback = data.feedback;
+      if (!feedback) {
+        toast.error('No feedback received from backend.');
+        return;
+      }
+
+      // Convert backend JSON to AnalysisResults format
+      const sections: AnalysisSection[] = [
+        feedback.skills_assessment && {
+          title: 'Skills Assessment',
+          content: [
+            `Technical Skills: ${(feedback.skills_assessment.technical_skills || []).join(', ')}`,
+            `Soft Skills: ${(feedback.skills_assessment.soft_skills || []).join(', ')}`,
+            `Relevant Skills: ${(feedback.skills_assessment.relevant_skills || []).join(', ')}`,
+            `Skill Gaps: ${(feedback.skills_assessment.skill_gaps || []).join(', ')}`,
+          ].join('\n'),
+          score: undefined,
+          suggestions: undefined,
+        },
+        feedback.experience_evaluation && {
+          title: 'Experience Evaluation',
+          content: Object.entries(feedback.experience_evaluation)
+            .map(([k, v]) => `${k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}: ${v}`)
+            .join('\n'),
+          score: undefined,
+          suggestions: undefined,
+        },
+        feedback.education_qualifications && {
+          title: 'Education Qualifications',
+          content: (Array.isArray(feedback.education_qualifications)
+            ? feedback.education_qualifications.map((entry, idx) => {
+                const lines = [
+                  entry.University ? `University: ${entry.University}` : null,
+                  entry.Degree ? `Degree: ${entry.Degree}` : null,
+                  entry['Graduation Year'] ? `Graduation Year: ${entry['Graduation Year']}` : null,
+                  entry.GPA ? `GPA: ${entry.GPA}` : null,
+                  entry.Honors ? `Honors: ${entry.Honors}` : null,
+                ].filter(Boolean);
+                return lines.join('\n');
+              }).join('\n\n')
+            : ''),
+          score: undefined,
+          suggestions: undefined,
+        },
+        feedback.format_structure && {
+          title: 'Format & Structure',
+          content: Object.entries(feedback.format_structure)
+            .map(([k, v]) => `${k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}: ${v}`)
+            .join('\n'),
+          score: undefined,
+          suggestions: undefined,
+        },
+      ].filter(Boolean) as AnalysisSection[];
+
+      // Add improvement suggestions if present
+      if (feedback.improvement_suggestions) {
+        const improvementSection: AnalysisSection = {
+          title: 'Improvement Suggestions',
+          content: '',
+          score: undefined,
+          suggestions: feedback.improvement_suggestions,
+        };
+        sections.push(improvementSection);
+      }
+
+      setAnalysisResults({
+        overallScore: feedback.overall_score || 0,
+        sections,
+        timestamp: new Date().toISOString(),
+      });
       toast.success('Resume analysis completed!');
     } catch (error) {
       console.error('Analysis failed:', error);
