@@ -99,13 +99,12 @@ const Index = () => {
         feedback.education_qualifications && {
           title: 'Education Qualifications',
           content: (Array.isArray(feedback.education_qualifications)
-            ? feedback.education_qualifications.map((entry, idx) => {
+            ? feedback.education_qualifications.map((entry) => {
                 const lines = [
                   entry.University ? `University: ${entry.University}` : null,
                   entry.Degree ? `Degree: ${entry.Degree}` : null,
                   entry['Graduation Year'] ? `Graduation Year: ${entry['Graduation Year']}` : null,
                   entry.GPA ? `GPA: ${entry.GPA}` : null,
-                  entry.Honors ? `Honors: ${entry.Honors}` : null,
                 ].filter(Boolean);
                 return lines.join('\n');
               }).join('\n\n')
