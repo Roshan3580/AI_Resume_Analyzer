@@ -13,8 +13,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "*",  # For development
-        "https://ai-resume-analyzer-frontend-5e2p.onrender.com",  # Your deployed frontend
-        "https://ai-resume-analyzer-frontend.onrender.com",  # Alternative frontend URL
+        "https://ai-resume-analyzer-frontend-5e2p.onrender.com",  # Old frontend URL
+        "https://resume-analyzer-Roshan3580.onrender.com",  # New frontend URL
+        "https://resume-analyzer-Roshan3580-*.onrender.com",  # Any suffix variation
     ],
     allow_credentials=True,
     allow_methods=["*"],
