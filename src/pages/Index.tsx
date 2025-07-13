@@ -56,7 +56,7 @@ const Index = () => {
       formData.append('file', selectedFile);
       formData.append('api_key', apiKey);
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const apiUrl = 'https://ai-resume-analyzer-backend-iwpf.onrender.com';
       const response = await fetch(`${apiUrl}/analyze`, {
         method: 'POST',
         body: formData,
