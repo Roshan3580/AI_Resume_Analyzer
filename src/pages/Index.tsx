@@ -56,8 +56,7 @@ const Index = () => {
       formData.append('file', selectedFile);
       formData.append('api_key', apiKey);
 
-      const apiUrl = 'https://ai-resume-analyzer-backend-iwpf.onrender.com';
-      const response = await fetch(`${apiUrl}/analyze`, {
+      const response = await fetch('https://ai-resume-analyzer-dmlb.onrender.com/analyze', {
         method: 'POST',
         body: formData,
       });

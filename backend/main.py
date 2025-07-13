@@ -11,7 +11,11 @@ app = FastAPI()
 # Allow CORS for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "*",  # For development
+        "https://ai-resume-analyzer-frontend-5e2p.onrender.com",  # Your deployed frontend
+        "https://ai-resume-analyzer-frontend.onrender.com",  # Alternative frontend URL
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,8 +27,8 @@ def read_root():
 
 @app.post("/analyze")
 async def analyze_resume(
-    file: UploadFile = File(...),
-    api_key: Optional[str] = Form(None)
+        file: UploadFile = File(...),
+        api_key: Optional[str] = Form(None)
 ) -> Dict[str, Any]:
     """
     Analyze a resume uploaded as a PDF file using Groq API.
@@ -132,4 +136,4 @@ async def analyze_resume(
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return {"error": f"An error occurred: {str(e)}"} 
+        return {"error": f"An error occurred: {str(e)}"}
