@@ -1,5 +1,8 @@
 # AI Resume Analyzer
 
+
+![Resume Analyzer Dashboard](public/ResumeAnalyzer.png)
+
 AI Resume Analyzer is a web application that helps job seekers improve their resumes by providing AI-powered feedback and analysis. Upload your resume and receive detailed insights on skills, experience, education, and actionable suggestions for improvement.
 
 ---
