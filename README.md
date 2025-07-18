@@ -7,7 +7,7 @@ AI Resume Analyzer is a web application that helps job seekers improve their res
 
 ## Live Demo
 
-**🌐 Website**: [https://ai-resume-analyzer-frontend-5e2p.onrender.com/](https://ai-resume-analyzer-frontend-5e2p.onrender.com/)
+**Website**: [https://ai-resume-analyzer-frontend-5e2p.onrender.com/](https://ai-resume-analyzer-frontend-5e2p.onrender.com/)
 
 ---
 
